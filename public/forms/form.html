@@ -1,13 +1,13 @@
  <script type="text/javascript">
 
-function validateForm() {
-    var user = document.forms["addForm"]["uname"].value.trim();
+function validateForm(obj) {
+    var user = obj.uname.value.trim();
     if (user == null || user == "") {
         alert("Name must be filled out");
         return false;
     }
 
-    var email = document.forms["addForm"]["email"].value;
+    var email = obj.email.value;
     if(email.match(/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/g) == null)
     {
     	alert("Invalid Email");
@@ -16,7 +16,7 @@ function validateForm() {
 }
 </script>
 
-<form name="addForm" action="/" onsubmit="return validateForm()" method="post">
+<form name="addForm" action="/" onsubmit="return validateForm(this)" method="post">
 Name: <input type="text" name="uname" required><br>
 Email: <input type="text" name="email" required><br>
 <input type="submit" value="Submit">
