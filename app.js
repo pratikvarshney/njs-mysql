@@ -4,7 +4,7 @@ var validator = require("email-validator");
 var app = express();
 
 app.get('/', function (req, res) {
-  res.send('Click submit to post <form method="post"><input type="submit" value="submit" /></form>');
+  res.sendFile(__dirname+'/public/forms/form.html');
 });
 
 //parser
@@ -43,27 +43,60 @@ app.post('/', function (req, res) {
     return;
   }
 
-  res.send('Got a POST request from ' + req.body.uname.toString() + '<br>email : ' + req.body.email.toString());
+  res.write('Got a POST request from ' + req.body.uname.toString() + '\nemail : ' + req.body.email.toString());
 
-  var query = "select max(uid) as maxm from userdata";
+  var query = "select * from userdata where username = '" + req.body.uname.toString() + "' or email = '" + req.body.email.toString() +"';";
 
   connection.query(query, function(err, rows, fields) {
 
-    var uid = 0;
-    if(rows.length>0)
-    {
-      uid = (Number(rows[0].maxm)+1);
-    }
-    var query = "INSERT INTO userdata VALUES ("+ uid +", '"+ req.body.uname.toString() +"', '"+ req.body.email.toString() + "');";
-  
-    connection.query(query, function(err, rows, fields) {
-    connection.end();
     if (!err){
-      console.log('The solution is: ', rows);
+      console.log('Select Query Done.');
     }
     else{
-      console.log('Error while performing Query.');
+      console.log('Error while performing Select Query.');
+      connection.end();
+      return;
     }
+
+    if(rows.length>0)
+    {
+      res.write('\nUsername or email already exist');
+      res.end();
+      return;
+    }
+
+    var query = "select max(uid) as maxm from userdata;";
+    connection.query(query, function(err, rows, fields) {
+
+      if (!err){
+        console.log('Select Query Done.');
+      }
+      else{
+        console.log('Error while performing Select Query.');
+        connection.end();
+        return;
+      }
+
+      var uid = 0;
+      if(rows.length>0)
+      {
+        uid = (Number(rows[0].maxm)+1);
+      }
+      var query = "INSERT INTO userdata VALUES ("+ uid +", '"+ req.body.uname.toString() +"', '"+ req.body.email.toString() + "');";
+    
+      connection.query(query, function(err, rows, fields) {
+      connection.end();
+      if (!err){
+        console.log('Insert Query Done.');
+      }
+      else{
+        console.log('Error while performing Insert Query.');
+      }
+
+      res.write('\nQuery done...');
+      res.end();
+
+      });
 
     });
 
